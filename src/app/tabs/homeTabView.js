@@ -1,20 +1,19 @@
-import React, { useContext } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { SessionContext } from '../../context/SessionProvider';
+import React, { useContext, useState } from 'react';
+import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import CalendarComponent from '../../components/CalendarComponent';
-import DailyNoteComponent from '../../components/dailyNoteComponent';
+import DailyNoteComponent from '../../components/dailyNoteComponent'; // Assuming this is the correct import path
+
 
 export default function HomeTabView() {
-  const { handleLogout } = useContext(SessionContext);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
 
   return (
     <View style={styles.container}>
-      <CalendarComponent />
-      <DailyNoteComponent />
+      <CalendarComponent onDateSelected={setSelectedDate} />
 
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutButtonText}>Logout</Text>
-      </TouchableOpacity>
+      <View style={styles.contentContainer}>
+        {selectedDate && <DailyNoteComponent selectedDate={selectedDate} />}
+      </View>
     </View>
   );
 }
@@ -22,20 +21,31 @@ export default function HomeTabView() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     backgroundColor: '#f5f5f5',
   },
+  calendarContainer: {
+    width: '100px',
+    backgroundColor: '#red',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+    paddingVertical: 10,
+  },
+  contentContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 10,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 18,
     color: '#666',
-    marginBottom: 20,
+    marginBottom: 30,
   },
   logoutButton: {
     backgroundColor: '#d9534f',
