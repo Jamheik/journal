@@ -1,25 +1,41 @@
-import React from "react";
+import React, { useState } from "react";
+import PropTypes from 'prop-types';
 import { View, StyleSheet, SafeAreaView } from "react-native";
 import { Calendar } from "react-native-calendars";
 
-const CalendarComponent = () => {
+const CalendarComponent = ({ onDateSelected }) => {
+  const [selectedDate, setSelectedDate] = useState(null);
+
   const onCalendarPress = (day) => {
-    alert(day.dateString);
+    setSelectedDate(day.dateString);
+    onDateSelected(day.dateString);
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <Calendar
         onDayPress={onCalendarPress}
+        markedDates={
+          selectedDate ? { [selectedDate]: { selected: true, selectedColor: '#ff6347' } } : {}
+        }
         theme={{
-          backgroundColor: "#000000",
-          calendarBackground: "#000000",
-          textSectionTitleColor: "#FFFFFF",
-          selectedDayBackgroundColor: "#1e90ff",
-          selectedDayTextColor: "#FFFFFF",
-          todayTextColor: "#FFFFFF",
-          dayTextColor: "#FFFFFF",
-          textDisabledColor: "#555555",
+          backgroundColor: '#f5f5f5',
+          calendarBackground: '#f3edf7',
+          textSectionTitleColor: '#000000',
+          selectedDayBackgroundColor: '#ff6347',
+          selectedDayTextColor: '#ffffff',
+          todayBackgroundColor: '#87ceeb',
+          todayTextColor: '#ffffff',
+          dayTextColor: '#000000',
+          textDisabledColor: '#d9e1e8',
+          monthTextColor: '#000000',
+          arrowColor: '#000000',
+          textDayFontWeight: '500',
+          textMonthFontWeight: 'bold',
+          textDayHeaderFontWeight: '500',
+          textDayFontSize: 16,
+          textMonthFontSize: 18,
+          textDayHeaderFontSize: 14,
         }}
         style={{
           borderWidth: 1,
@@ -35,6 +51,10 @@ const CalendarComponent = () => {
       />
     </SafeAreaView>
   );
+};
+
+CalendarComponent.propTypes = {
+  onDateSelected: PropTypes.func.isRequired,
 };
 
 const styles = StyleSheet.create({

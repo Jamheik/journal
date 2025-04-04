@@ -1,107 +1,168 @@
-import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TextInput, FlatList, TouchableOpacity, Alert, TouchableWithoutFeedback } from 'react-native';
+import ModalComponent from './ModalComponent';
+import { getFirestore, collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
 
-const DATA = [
-  {
-    date: "2025-4-4",
-    timestamp: "2025-2-3T12:00:00Z",
-    text: "Minua ei vituttanut (paljoa)",
-  },
-  {
-    date: "2025-4-4",
-    timestamp: "2025-2-3T12:00:00Z",
-    text: "Minua ei vituttanut (paljoa)",
-  },
-  {
-    date: "2025-4-3",
-    timestamp: "2025-2-3T12:00:00Z",
-    text: "Minua ei vituttanut (paljoa)",
-  },
-  {
-    date: "2025-4-2",
-    timestamp: "2025-2-3T12:00:00Z",
-    text: "Minua ei vituttanut (paljoa)",
-  },
-  {
-    date: "2025-4-1",
-    timestamp: "2025-2-3T12:00:00Z",
-    text: "Minua ei vituttanut (paljoa)",
-  },
-];
+const DailyNoteComponent = ({ selectedDate, userId }) => {
+  const [text, setText] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
+  const [notes, setNotes] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const db = getFirestore();
 
-const DailyNoteComponent = () => {
-  const renderNote = ({ item }) => {
-    return (
-      <View style={styles.itemRender}>
-        <Text style={styles.text}>{item.date}</Text>
-        <Text style={styles.text}>{item.text}</Text>
-      </View>
+  useEffect(() => {
+    const fetchNotes = async () => {
+      try {
+        const q = query(
+          collection(db, 'notes'),
+          where('date', '==', selectedDate),
+          where('userId', '==', userId)
+        );
+        const querySnapshot = await getDocs(q);
+        const fetchedNotes = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setNotes(fetchedNotes);
+      } catch (error) {
+        console.error('Error fetching notes:', error);
+      }
+    };
+
+    fetchNotes();
+  }, [selectedDate, userId]);
+
+  const refreshNotes = async () => {
+    setRefreshing(true);
+    try {
+      const q = query(
+        collection(db, 'notes'),
+        where('date', '==', selectedDate),
+        where('userId', '==', userId)
+      );
+      const querySnapshot = await getDocs(q);
+      const fetchedNotes = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setNotes(fetchedNotes);
+    } catch (error) {
+      console.error('Error refreshing notes:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const handleDeleteNote = async (noteId) => {
+    try {
+      await deleteDoc(doc(db, 'notes', noteId));
+      setNotes((prevNotes) => prevNotes.filter((note) => note.id !== noteId));
+      console.log('Note deleted successfully');
+    } catch (error) {
+      console.error('Error deleting note:', error);
+    }
+  };
+
+  const confirmDelete = (noteId) => {
+    Alert.alert(
+      'Delete Note',
+      'Are you sure you want to delete this note?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', style: 'destructive', onPress: () => handleDeleteNote(noteId) },
+      ]
     );
   };
 
-  const handleActionButtonPress = () => {
-    console.log("Action button pressed");
+  const renderNote = ({ item }) => (
+    <TouchableWithoutFeedback
+      onLongPress={() => confirmDelete(item.id)}
+      delayLongPress={600}
+    >
+      <View style={styles.noteContainer}>
+        <Text style={styles.noteText}>{item.content}</Text>
+      </View>
+    </TouchableWithoutFeedback>
+  );
+
+  const handleAddNote = async () => {
+    refreshNotes();
+    setModalVisible(false);
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
+      <Text style={styles.dateText}>Notes for: {selectedDate}</Text>
+
       <FlatList
-        data={DATA}
+        data={notes}
         renderItem={renderNote}
         keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.listContainer}
+        refreshing={refreshing}
+        onRefresh={refreshNotes}
       />
+
       <TouchableOpacity
-        style={styles.floatingButton}
-        onPress={handleActionButtonPress}
+        style={styles.fab}
+        onPress={() => setModalVisible(true)}
       >
-        <Text style={styles.buttonText}>+</Text>
+        <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>
-    </SafeAreaView>
+
+      <ModalComponent
+        modalVisible={modalVisible}
+        setModalVisible={setModalVisible}
+        text={text}
+        setText={setText}
+        handleAddNote={handleAddNote}
+        selectedDate={selectedDate}
+      />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "stretch",
-    backgroundColor: "#f5f5f5",
-    width: "100%",
-  },
-  text: {
-    fontSize: 18,
-    color: "#333",
-  },
-  itemRender: {
-    backgroundColor: "#fff",
     padding: 20,
-    marginVertical: 8,
-    marginHorizontal: 0,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
+    backgroundColor: '#f5f5f5',
   },
-  floatingButton: {
-    position: "absolute",
-    bottom: 20,
-    right: 20,
-    backgroundColor: "#007BFF",
+  dateText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#333',
+  },
+  listContainer: {
+    paddingBottom: 20,
+  },
+  noteContainer: {
+    backgroundColor: '#f3edf7',
+    padding: 15,
+    marginBottom: 10,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  noteText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 2,
+    right: -20,
+    backgroundColor: '#007BFF',
     width: 60,
     height: 60,
     borderRadius: 30,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 5,
+    zIndex: 1, // Ensure it stays above other elements
   },
-  buttonText: {
-    color: "#fff",
+  fabText: {
+    color: '#fff',
     fontSize: 24,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
 });
 
