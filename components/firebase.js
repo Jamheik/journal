@@ -1,9 +1,11 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-
+import { GoogleAuthProvider } from "firebase/auth";
+import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const firebaseConfig = {
-  apiKey:  process.env.local.FIREBASE_API_KEY,
+  apiKey: "AIzaSyB-sNcAtQcmNggCkKXd0M-D2CR2Mz-lZVk",
   authDomain: "journal-1358a.firebaseapp.com",
   projectId: "journal-1358a",
   storageBucket: "journal-1358a.firebasestorage.app",
@@ -14,3 +16,11 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
+
+// Initialize Firebase Authentication and get a reference to the service
+const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(AsyncStorage),
+});
+const googleProvider = new GoogleAuthProvider();
+
+export { auth, googleProvider };

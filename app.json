@@ -1,5 +1,6 @@
 {
   "expo": {
+    "scheme":"journal-app",
     "name": "journal",
     "slug": "journal",
     "version": "1.0.0",
