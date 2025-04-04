@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import LandingView from './src/views/LandingView';
@@ -20,5 +19,3 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 });
-=======
->>>>>>> 3a8df65 (feat: add authentication screens and navigation setup)
