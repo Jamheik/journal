@@ -8,7 +8,7 @@ const CalendarComponent = ({ onDateSelected }) => {
 
   const onCalendarPress = (day) => {
     setSelectedDate(day.dateString);
-    onDateSelected(day.dateString); // Export selected date
+    onDateSelected(day.dateString);
   };
 
   return (
@@ -22,9 +22,9 @@ const CalendarComponent = ({ onDateSelected }) => {
           backgroundColor: '#f5f5f5',
           calendarBackground: '#f3edf7',
           textSectionTitleColor: '#000000',
-          selectedDayBackgroundColor: '#ff6347', // Highlight selected date
+          selectedDayBackgroundColor: '#ff6347',
           selectedDayTextColor: '#ffffff',
-          todayBackgroundColor: '#87ceeb', // Highlight current date
+          todayBackgroundColor: '#87ceeb',
           todayTextColor: '#ffffff',
           dayTextColor: '#000000',
           textDisabledColor: '#d9e1e8',

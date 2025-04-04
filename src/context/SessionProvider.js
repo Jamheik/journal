@@ -6,12 +6,12 @@ export const SessionContext = createContext();
 export const SessionProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [userId, setUserId] = useState(null); // State to store userId
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        setUserId(user.uid); // Set userId when user is authenticated
+        setUserId(user.uid);
         user.getIdTokenResult().then((idTokenResult) => {
           const isTokenValid = idTokenResult.expirationTime > new Date().toISOString();
           if (isTokenValid) {
@@ -21,7 +21,7 @@ export const SessionProvider = ({ children }) => {
           }
         });
       } else {
-        setUserId(null); // Clear userId when user is not authenticated
+        setUserId(null);
         setIsAuthenticated(false);
       }
       setLoading(false);
@@ -33,7 +33,7 @@ export const SessionProvider = ({ children }) => {
   const handleLogout = () => {
     auth.signOut().then(() => {
       setIsAuthenticated(false);
-      setUserId(null); // Clear userId on logout
+      setUserId(null);
     });
   };
 

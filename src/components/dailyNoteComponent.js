@@ -6,9 +6,9 @@ import { getFirestore, collection, query, where, getDocs, deleteDoc, doc } from 
 const DailyNoteComponent = ({ selectedDate, userId }) => {
   const [text, setText] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
-  const [notes, setNotes] = useState([]); // State to store notes
-  const [refreshing, setRefreshing] = useState(false); // State for pull-to-refresh
-  const db = getFirestore(); // Initialize Firestore
+  const [notes, setNotes] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const db = getFirestore();
 
   useEffect(() => {
     const fetchNotes = async () => {
@@ -16,7 +16,7 @@ const DailyNoteComponent = ({ selectedDate, userId }) => {
         const q = query(
           collection(db, 'notes'),
           where('date', '==', selectedDate),
-          where('userId', '==', userId) // Filter by current user's ID
+          where('userId', '==', userId)
         );
         const querySnapshot = await getDocs(q);
         const fetchedNotes = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -27,7 +27,7 @@ const DailyNoteComponent = ({ selectedDate, userId }) => {
     };
 
     fetchNotes();
-  }, [selectedDate, userId]); // Fetch notes whenever selectedDate or userId changes
+  }, [selectedDate, userId]);
 
   const refreshNotes = async () => {
     setRefreshing(true);
@@ -50,7 +50,7 @@ const DailyNoteComponent = ({ selectedDate, userId }) => {
   const handleDeleteNote = async (noteId) => {
     try {
       await deleteDoc(doc(db, 'notes', noteId));
-      setNotes((prevNotes) => prevNotes.filter((note) => note.id !== noteId)); // Update local state
+      setNotes((prevNotes) => prevNotes.filter((note) => note.id !== noteId));
       console.log('Note deleted successfully');
     } catch (error) {
       console.error('Error deleting note:', error);
@@ -70,8 +70,8 @@ const DailyNoteComponent = ({ selectedDate, userId }) => {
 
   const renderNote = ({ item }) => (
     <TouchableWithoutFeedback
-      onLongPress={() => confirmDelete(item.id)} // Trigger delete confirmation on long press
-      delayLongPress={600} 
+      onLongPress={() => confirmDelete(item.id)}
+      delayLongPress={600}
     >
       <View style={styles.noteContainer}>
         <Text style={styles.noteText}>{item.content}</Text>
@@ -80,7 +80,7 @@ const DailyNoteComponent = ({ selectedDate, userId }) => {
   );
 
   const handleAddNote = async () => {
-    refreshNotes(); // Refresh notes after adding a new one
+    refreshNotes();
     setModalVisible(false);
   };
 
@@ -93,8 +93,8 @@ const DailyNoteComponent = ({ selectedDate, userId }) => {
         renderItem={renderNote}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
-        refreshing={refreshing} // Add refreshing state
-        onRefresh={refreshNotes} // Add pull-to-refresh functionality
+        refreshing={refreshing}
+        onRefresh={refreshNotes}
       />
 
       <TouchableOpacity
@@ -110,7 +110,7 @@ const DailyNoteComponent = ({ selectedDate, userId }) => {
         text={text}
         setText={setText}
         handleAddNote={handleAddNote}
-        selectedDate={selectedDate} // Pass selectedDate to ModalComponent
+        selectedDate={selectedDate}
       />
     </View>
   );
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   noteContainer: {
-    backgroundColor: '#f3edf7', // Match Calendar background color
+    backgroundColor: '#f3edf7',
     padding: 15,
     marginBottom: 10,
     borderRadius: 8,

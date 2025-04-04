@@ -3,9 +3,9 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, Modal } from 'reac
 import { SessionContext } from '../context/SessionProvider';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
 
-const ModalComponent = ({ modalVisible, setModalVisible, text, setText, selectedDate,handleAddNote }) => { // Pass selectedDate as a prop
-    const { userId } = useContext(SessionContext); // Access userId from context
-    const db = getFirestore(); // Initialize Firestore
+const ModalComponent = ({ modalVisible, setModalVisible, text, setText, selectedDate,handleAddNote }) => {
+    const { userId } = useContext(SessionContext);
+    const db = getFirestore();
 
     const handleSaveNote = async () => {
         if (userId && text.trim()) {
@@ -14,11 +14,11 @@ const ModalComponent = ({ modalVisible, setModalVisible, text, setText, selected
                     userId: userId,
                     content: text,
                     createdAt: new Date().toISOString(),
-                    date: selectedDate, // Use selectedDate instead of current date
+                    date: selectedDate,
                 });
                 console.log('Note saved successfully');
-                setText(''); // Clear the text input
-                handleAddNote(); // Call the function to refresh notes in the parent component
+                setText('');
+                handleAddNote();
             } catch (error) {
                 console.error('Error saving note:', error);
             }
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
     },
     modalTextInput: {
         width: '100%',
-        height: 200, // Double the current height
+        height: 200,
         borderColor: '#ddd',
         borderWidth: 1,
         borderRadius: 5,
