@@ -2,13 +2,18 @@ import React, { useContext, useState } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import CalendarComponent from '../../components/CalendarComponent';
 import DailyNoteComponent from '../../components/dailyNoteComponent'; // Assuming this is the correct import path
-
+import { SessionContext } from '../../context/SessionProvider';
 
 export default function HomeTabView() {
+  const { userId } = useContext(SessionContext); // Access userId from context
+
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
 
   return (
     <View style={styles.container}>
+      <Text>
+        User ID: {userId}
+      </Text>
       <CalendarComponent onDateSelected={setSelectedDate} />
 
       <View style={styles.contentContainer}>
@@ -22,6 +27,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+  },
+  userIdText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    margin: 10,
+    color: '#333',
   },
   calendarContainer: {
     width: '100px',
