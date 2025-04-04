@@ -148,8 +148,8 @@ const styles = StyleSheet.create({
   },
   fab: {
     position: 'absolute',
-    bottom: 20,
-    right: 20,
+    bottom: 2,
+    right: -20,
     backgroundColor: '#007BFF',
     width: 60,
     height: 60,
@@ -157,6 +157,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 5,
+    zIndex: 1, // Ensure it stays above other elements
   },
   fabText: {
     color: '#fff',
