@@ -1,6 +1,6 @@
 import { Text, View, StyleSheet, TextInput, TouchableOpacity } from "react-native";
 import React, { useState } from "react";
-import { auth } from '../../../components/firebase';
+import { auth } from '../../components/firebase';
 import { useNavigation } from "@react-navigation/native";
 
 import { createUserWithEmailAndPassword } from 'firebase/auth';

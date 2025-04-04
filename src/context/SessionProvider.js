@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
-import { auth } from '../../components/firebase';
+import { auth } from '../components/firebase';
 
 export const SessionContext = createContext();
 

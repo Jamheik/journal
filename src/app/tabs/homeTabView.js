@@ -1,14 +1,16 @@
 import React, { useContext } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SessionContext } from '../../context/SessionProvider';
+import CalendarComponent from '../../components/CalendarComponent';
+import DailyNoteComponent from '../../components/dailyNoteComponent';
 
 export default function HomeTabView() {
   const { handleLogout } = useContext(SessionContext);
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Welcome to the Home Page</Text>
-      <Text style={styles.subtitle}>This is some dummy content for the home page.</Text>
+      <CalendarComponent />
+      <DailyNoteComponent />
 
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutButtonText}>Logout</Text>

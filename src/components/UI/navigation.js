@@ -15,7 +15,7 @@ const Navigation = () => {
     <NavigationContainer>
       <Stack.Navigator>
         {isAuthenticated ? (
-          <Stack.Screen name="Home" component={HomeTabView} options={{ headerShown: false }} />
+          <Stack.Screen name="Home" component={HomeTabView} />
         ) : (
           <>
             <Stack.Screen name="Login" component={LoginTabView} />

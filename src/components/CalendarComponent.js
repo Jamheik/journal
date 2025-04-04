@@ -20,6 +20,17 @@ const LandingComponent = () => {
           dayTextColor: '#FFFFFF',
           textDisabledColor: '#555555',
         }}
+        style={{
+          borderWidth: 1,
+          borderColor: "#FFFFFF",
+          borderRadius: 10,
+          margin: 10,
+          width: "90%",
+          alignSelf: "center",
+        }}
+        hideExtraDays={true}
+        enableSwipeMonths={true}
+        firstDay={1}
       />
     </SafeAreaView>
   );
