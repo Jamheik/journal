@@ -38,7 +38,7 @@ export const SessionProvider = ({ children }) => {
   };
 
   return (
-    <SessionContext.Provider value={{ isAuthenticated, handleLogout, userId }}> // Provide userId in context
+    <SessionContext.Provider value={{ isAuthenticated, handleLogout, userId }}>
       {!loading && children}
     </SessionContext.Provider>
   );

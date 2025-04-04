@@ -1,45 +1,101 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TextInput, FlatList, TouchableOpacity, Alert, TouchableWithoutFeedback } from 'react-native';
 import ModalComponent from './ModalComponent';
+import { getFirestore, collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
 
-const DailyNoteComponent = ({ selectedDate }) => {
+const DailyNoteComponent = ({ selectedDate, userId }) => {
   const [text, setText] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
+  const [notes, setNotes] = useState([]); // State to store notes
+  const [refreshing, setRefreshing] = useState(false); // State for pull-to-refresh
+  const db = getFirestore(); // Initialize Firestore
 
-  const handleAddNote = () => {
+  useEffect(() => {
+    const fetchNotes = async () => {
+      try {
+        const q = query(
+          collection(db, 'notes'),
+          where('date', '==', selectedDate),
+          where('userId', '==', userId) // Filter by current user's ID
+        );
+        const querySnapshot = await getDocs(q);
+        const fetchedNotes = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setNotes(fetchedNotes);
+      } catch (error) {
+        console.error('Error fetching notes:', error);
+      }
+    };
+
+    fetchNotes();
+  }, [selectedDate, userId]); // Fetch notes whenever selectedDate or userId changes
+
+  const refreshNotes = async () => {
+    setRefreshing(true);
+    try {
+      const q = query(
+        collection(db, 'notes'),
+        where('date', '==', selectedDate),
+        where('userId', '==', userId)
+      );
+      const querySnapshot = await getDocs(q);
+      const fetchedNotes = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setNotes(fetchedNotes);
+    } catch (error) {
+      console.error('Error refreshing notes:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const handleDeleteNote = async (noteId) => {
+    try {
+      await deleteDoc(doc(db, 'notes', noteId));
+      setNotes((prevNotes) => prevNotes.filter((note) => note.id !== noteId)); // Update local state
+      console.log('Note deleted successfully');
+    } catch (error) {
+      console.error('Error deleting note:', error);
+    }
+  };
+
+  const confirmDelete = (noteId) => {
+    Alert.alert(
+      'Delete Note',
+      'Are you sure you want to delete this note?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', style: 'destructive', onPress: () => handleDeleteNote(noteId) },
+      ]
+    );
+  };
+
+  const renderNote = ({ item }) => (
+    <TouchableWithoutFeedback
+      onLongPress={() => confirmDelete(item.id)} // Trigger delete confirmation on long press
+      delayLongPress={600} 
+    >
+      <View style={styles.noteContainer}>
+        <Text style={styles.noteText}>{item.content}</Text>
+      </View>
+    </TouchableWithoutFeedback>
+  );
+
+  const handleAddNote = async () => {
+    refreshNotes(); // Refresh notes after adding a new one
     setModalVisible(false);
-    // Logic to save the note can be added here
-    console.log(`Note added for ${selectedDate}: ${text}`);
   };
 
   return (
     <View style={styles.container}>
-
       <Text style={styles.dateText}>Notes for: {selectedDate}</Text>
 
-      <ScrollView>
-
-        <View style={styles.Content}>
-          <Text style={styles.reportText}>Dummy Report:</Text>
-          <Text style={styles.reportText}>
-            "Today was a productive day. I completed my tasks and enjoyed a nice walk in the evening."
-          </Text>
-        </View>
-        
-        <View style={styles.Content}>
-          <Text style={styles.reportText}>Dummy Report:</Text>
-          <Text style={styles.reportText}>
-            "Today was a productive day. I completed my tasks and enjoyed a nice walk in the evening."
-          </Text>
-        </View>
-
-        <View style={styles.Content}>
-          <Text style={styles.reportText}>Dummy Report:</Text>
-          <Text style={styles.reportText}>
-            "Today was a productive day. I completed my tasks and enjoyed a nice walk in the evening."
-          </Text>
-        </View>
-      </ScrollView>
+      <FlatList
+        data={notes}
+        renderItem={renderNote}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.listContainer}
+        refreshing={refreshing} // Add refreshing state
+        onRefresh={refreshNotes} // Add pull-to-refresh functionality
+      />
 
       <TouchableOpacity
         style={styles.fab}
@@ -54,6 +110,7 @@ const DailyNoteComponent = ({ selectedDate }) => {
         text={text}
         setText={setText}
         handleAddNote={handleAddNote}
+        selectedDate={selectedDate} // Pass selectedDate to ModalComponent
       />
     </View>
   );
@@ -63,28 +120,31 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    backgroundColor: '#f5f5f5',
   },
   dateText: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
+    color: '#333',
   },
-  textInput: {
-    height: 100,
-    borderColor: '#ddd',
-    borderWidth: 1,
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 20,
-    textAlignVertical: 'top',
+  listContainer: {
+    paddingBottom: 20,
   },
-  Content: {
-    marginTop: 20,
-    backgroundColor: '#fff',
-  },
-  reportText: {
-    fontSize: 16,
+  noteContainer: {
+    backgroundColor: '#f3edf7', // Match Calendar background color
+    padding: 15,
     marginBottom: 10,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  noteText: {
+    fontSize: 16,
+    color: '#333',
   },
   fab: {
     position: 'absolute',

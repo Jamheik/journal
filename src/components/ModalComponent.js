@@ -1,7 +1,32 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Modal } from 'react-native';
+import { SessionContext } from '../context/SessionProvider';
+import { getFirestore, collection, addDoc } from 'firebase/firestore';
 
-const ModalComponent = ({ modalVisible, setModalVisible, text, setText, handleAddNote }) => {
+const ModalComponent = ({ modalVisible, setModalVisible, text, setText, selectedDate,handleAddNote }) => { // Pass selectedDate as a prop
+    const { userId } = useContext(SessionContext); // Access userId from context
+    const db = getFirestore(); // Initialize Firestore
+
+    const handleSaveNote = async () => {
+        if (userId && text.trim()) {
+            try {
+                await addDoc(collection(db, 'notes'), {
+                    userId: userId,
+                    content: text,
+                    createdAt: new Date().toISOString(),
+                    date: selectedDate, // Use selectedDate instead of current date
+                });
+                console.log('Note saved successfully');
+                setText(''); // Clear the text input
+                handleAddNote(); // Call the function to refresh notes in the parent component
+            } catch (error) {
+                console.error('Error saving note:', error);
+            }
+        } else {
+            console.warn('User ID or note content is missing');
+        }
+    };
+
     return (
         <Modal
             animationType="slide"
@@ -26,7 +51,7 @@ const ModalComponent = ({ modalVisible, setModalVisible, text, setText, handleAd
                             <Text style={styles.modalButtonText}>Cancel</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={styles.modalButton} onPress={handleAddNote}>
+                        <TouchableOpacity style={styles.modalButton} onPress={handleSaveNote}>
                             <Text style={styles.modalButtonText}>Save</Text>
                         </TouchableOpacity>
                     </View>
