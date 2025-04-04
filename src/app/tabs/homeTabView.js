@@ -14,7 +14,7 @@ export default function HomeTabView() {
       <CalendarComponent onDateSelected={setSelectedDate} />
 
       <View style={styles.contentContainer}>
-        {selectedDate && <DailyNoteComponent selectedDate={selectedDate} userId={userId} />} {/* Pass userId to DailyNoteComponent */}
+        <DailyNoteComponent selectedDate={selectedDate} userId={userId} />
       </View>
     </View>
   );
