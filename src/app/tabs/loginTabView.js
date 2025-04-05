@@ -3,6 +3,8 @@ import React, { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { auth } from '../../components/firebase';
 import {  signInWithEmailAndPassword } from 'firebase/auth';
+
+
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -105,5 +107,3 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
 });
-
-

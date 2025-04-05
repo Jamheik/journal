@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, FlatList, TouchableOpacity, Alert, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, StyleSheet, TextInput, FlatList, TouchableOpacity, Alert, TouchableWithoutFeedback, ActivityIndicator } from 'react-native';
 import ModalComponent from './ModalComponent';
 import { getFirestore, collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
 
@@ -12,6 +12,8 @@ const DailyNoteComponent = ({ selectedDate, userId }) => {
 
   useEffect(() => {
     const fetchNotes = async () => {
+      setRefreshing(true);
+      setNotes([]); // Clear notes before fetching new ones
       try {
         const q = query(
           collection(db, 'notes'),
@@ -23,6 +25,8 @@ const DailyNoteComponent = ({ selectedDate, userId }) => {
         setNotes(fetchedNotes);
       } catch (error) {
         console.error('Error fetching notes:', error);
+      } finally {
+        setRefreshing(false);
       }
     };
 
@@ -31,6 +35,7 @@ const DailyNoteComponent = ({ selectedDate, userId }) => {
 
   const refreshNotes = async () => {
     setRefreshing(true);
+    setNotes([]);
     try {
       const q = query(
         collection(db, 'notes'),
@@ -71,7 +76,7 @@ const DailyNoteComponent = ({ selectedDate, userId }) => {
   const renderNote = ({ item }) => (
     <TouchableWithoutFeedback
       onLongPress={() => confirmDelete(item.id)}
-      delayLongPress={600}
+      delayLongPress={400}
     >
       <View style={styles.noteContainer}>
         <Text style={styles.noteText}>{item.content}</Text>
@@ -86,7 +91,18 @@ const DailyNoteComponent = ({ selectedDate, userId }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.dateText}>Notes for: {selectedDate}</Text>
+      <View>
+        <Text style={styles.headerText}>Notes for the day</Text>
+        <Text style={styles.dateText}>{new Date(selectedDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</Text>
+      </View>
+
+      {refreshing && (
+        <ActivityIndicator size="large" color="#007BFF" style={styles.loadingIndicator} />
+      )}
+
+      {notes.length === 0 && !refreshing && (
+        <Text style={styles.noNotesText}>Doesn't have any notes for the day</Text>
+      )}
 
       <FlatList
         data={notes}
@@ -119,28 +135,41 @@ const DailyNoteComponent = ({ selectedDate, userId }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    padding: 0,
+    margin: 0,
     backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    width: '100%',
+  },
+  headerText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'center',
+    marginVertical: 10,
   },
   dateText: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: 'light',
     marginBottom: 10,
     color: '#333',
+    textAlign: 'center',
   },
   listContainer: {
-    paddingBottom: 20,
+    padding: 0,
   },
   noteContainer: {
     backgroundColor: '#f3edf7',
     padding: 15,
     marginBottom: 10,
     borderRadius: 8,
-    shadowColor: '#000',
+    borderWidth: 1,
+    borderColor: '#FFFFFF',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
+    width: '100%',
   },
   noteText: {
     fontSize: 16,
@@ -149,7 +178,7 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
     bottom: 2,
-    right: -20,
+    right: 2,
     backgroundColor: '#007BFF',
     width: 60,
     height: 60,
@@ -163,6 +192,15 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 24,
     fontWeight: 'bold',
+  },
+  loadingIndicator: {
+    marginVertical: 20,
+  },
+  noNotesText: {
+    fontSize: 16,
+    color: '#333',
+    textAlign: 'center',
+    marginVertical: 10,
   },
 });
 

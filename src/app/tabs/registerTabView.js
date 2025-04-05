@@ -2,25 +2,35 @@ import { Text, View, StyleSheet, TextInput, TouchableOpacity } from "react-nativ
 import React, { useState } from "react";
 import { auth } from '../../components/firebase';
 import { useNavigation } from "@react-navigation/native";
-
 import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { getFirestore, collection, setDoc, doc } from 'firebase/firestore';
 
 export default function Register() {
   const [email, setEmail] = useState('');
   const [fullname, setFullname] = useState('');
   const [password, setPassword] = useState('');
   const navigation = useNavigation();
+  const db = getFirestore();
 
   const handleRegister = () => {
-    createUserWithEmailAndPassword(auth,email, password)
-      .then((userCredential) => {
+    createUserWithEmailAndPassword(auth, email, password)
+      .then(async (userCredential) => {
         const user = userCredential.user;
-        user.updateProfile({ displayName: fullname }).then(() => {
-          console.log("User registered and logged in successfully:", user);
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'Home' }],
+        
+        try {
+          await setDoc(doc(collection(db, 'users'), user.uid), {
+            fullName: fullname,
+            email: user.email,
           });
+          console.log("User data saved to Firestore successfully");
+        } catch (error) {
+          console.error("Error saving user data to Firestore:", error);
+        }
+
+        console.log("User registered and logged in successfully:", user);
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Home' }],
         });
       })
       .catch((error) => {

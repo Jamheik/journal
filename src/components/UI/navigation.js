@@ -5,7 +5,8 @@ import { SessionContext } from '../../context/SessionProvider';
 import RegisterTabView from '../../app/tabs/registerTabView';
 import LoginTabView from '../../app/tabs/loginTabView';
 import HomeTabView from '../../app/tabs/homeTabView';
-import { TouchableOpacity, Text } from 'react-native';
+import { TouchableOpacity } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const Stack = createStackNavigator();
 
@@ -22,7 +23,7 @@ const Navigation = () => {
             options={{
               headerRight: () => (
                 <TouchableOpacity onPress={handleLogout} style={{ marginRight: 25 }}>
-                  <Text style={{ color: '#007BFF', fontSize: 16, fontWeight: 'bold' }}>Logout</Text>
+                  <Icon name="logout" size={24} color="#007BFF" />
                 </TouchableOpacity>
               ),
             }}
